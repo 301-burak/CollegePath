@@ -91,3 +91,25 @@ A simulated HTML 502 response from `GET /api/checklist` exposed an existing erro
 3. **Completion status updates — PASS.** Browser and API checks changed items to completed and incomplete and verified the returned/rendered status.
 4. **Checklist and completion status survive refresh and backend restart — PASS.** Browser-created and API-created test items retained their completed status after page refresh and an Express restart; the post-restart API response matched the SQLite rows.
 5. **Empty checklist message — PASS.** With a mocked empty `GET /api/checklist` response, the app displayed “Your checklist is ready when you are. Add your first task above to get started.” and did not display task groups.
+
+## Lesson 16: Polish and Presentation Prep
+
+### Asked
+Prepare the existing feature-frozen CollegePath app for Demo Day without adding features. Update the project README, create a 4–6 minute presentation script, review this log for accuracy, preserve existing checklist data while adding safe demo data, check navigation and both features, and run the existing build and lint checks. Do not commit or push.
+
+### Got
+- Expanded `README.md` with the intended users, existing features, technology stack, VS Code and Codespaces setup, API endpoints, React → Express → SQLite architecture, persistence test steps, demo data notes, and known limitations.
+- Created `DEMO-SCRIPT.md` with a timed presentation outline, a live demo path, an AI usage explanation, possible next steps, and a fallback plan.
+- Added two labeled demo checklist items to the existing local SQLite database: “Demo: Compare college application deadlines” (incomplete) and “Demo: Write questions for a school counselor” (complete). Existing rows were preserved.
+- No application features or application source code were added or changed.
+
+### Fixed
+No application bug or feature was fixed for Lesson 16. The documentation was created or updated as requested; existing user checklist rows were not deleted or modified.
+
+### How I Verified
+- `npm run build` and `npm run lint` in `client/` completed successfully.
+- The running Express health endpoint returned `ok`. `GET /api/checklist` returned four items and matched the SQLite data.
+- The browser displayed both feature sections and the demo checklist rows. Both navigation links point to existing section IDs, and no “Coming soon” text was found in the app.
+- Browser keyboard interaction selected Technology and Engineering and submitted the form: Technology returned three results (`Software Developer`, `Cybersecurity Analyst`, and `UX Designer`); Engineering returned three (`Civil Engineer`, `Mechanical Engineer`, and `Biomedical Engineer`); Technology + Engineering returned three results; and submitting with no interests displayed the friendly prompt.
+- Browser pointer-click automation on the Technology checkbox timed out because the parent career article was reported as intercepting the pointer event. The keyboard interaction did verify the recommendation flow, but this automation attempt does not establish a successful mouse interaction check or demonstrate an application defect. No application code was changed.
+- No server restart or page-refresh persistence test was performed specifically for the newly added Lesson 16 demo rows.
