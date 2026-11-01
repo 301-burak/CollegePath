@@ -1,6 +1,327 @@
+import { useEffect, useState } from 'react'
 import './App.css'
 
+const interestCategories = [
+  'Technology',
+  'Engineering',
+  'Business',
+  'Healthcare',
+  'Arts',
+  'Science',
+]
+
+const careerOptions = [
+  {
+    title: 'Software Developer',
+    interests: ['Technology', 'Science'],
+    description: 'Build apps and tools that help people solve everyday problems.',
+    skills: ['Problem-solving', 'Logical thinking', 'Teamwork'],
+    nextStep: 'Try a beginner coding project or join a school coding club.',
+  },
+  {
+    title: 'Cybersecurity Analyst',
+    interests: ['Technology', 'Business'],
+    description: 'Help organizations protect their computers, information, and people.',
+    skills: ['Attention to detail', 'Critical thinking', 'Communication'],
+    nextStep: 'Explore a beginner-friendly cybersecurity activity or computer club.',
+  },
+  {
+    title: 'UX Designer',
+    interests: ['Technology', 'Arts'],
+    description: 'Make websites and apps easier and more enjoyable for people to use.',
+    skills: ['Creativity', 'Empathy', 'Visual communication'],
+    nextStep: 'Redesign a page you use often and ask classmates to try it.',
+  },
+  {
+    title: 'Civil Engineer',
+    interests: ['Engineering', 'Science'],
+    description: 'Plan and improve structures and systems such as roads, bridges, and water networks.',
+    skills: ['Math', 'Planning', 'Problem-solving'],
+    nextStep: 'Look for a school engineering or robotics project to join.',
+  },
+  {
+    title: 'Mechanical Engineer',
+    interests: ['Engineering', 'Technology'],
+    description: 'Design and test machines and devices that make work safer or easier.',
+    skills: ['Math', 'Design', 'Hands-on problem-solving'],
+    nextStep: 'Build a simple mechanism or take part in a robotics challenge.',
+  },
+  {
+    title: 'Biomedical Engineer',
+    interests: ['Engineering', 'Healthcare'],
+    description: 'Create equipment and technology that support patient care and health research.',
+    skills: ['Science', 'Design', 'Collaboration'],
+    nextStep: 'Explore a biology or engineering project focused on helping people.',
+  },
+  {
+    title: 'Marketing Manager',
+    interests: ['Business', 'Arts'],
+    description: 'Help organizations share what they offer through thoughtful campaigns and stories.',
+    skills: ['Writing', 'Creativity', 'Communication'],
+    nextStep: 'Help promote a school club event and see which messages reach people.',
+  },
+  {
+    title: 'Financial Analyst',
+    interests: ['Business', 'Technology'],
+    description: 'Use data to help organizations understand budgets, investments, and plans.',
+    skills: ['Math', 'Data analysis', 'Attention to detail'],
+    nextStep: 'Practice making a simple budget for a club activity or personal goal.',
+  },
+  {
+    title: 'Entrepreneur',
+    interests: ['Business', 'Technology', 'Arts'],
+    description: 'Turn an idea into a product or service that meets a real need.',
+    skills: ['Initiative', 'Planning', 'Communication'],
+    nextStep: 'Ask people about a problem they face and brainstorm a small solution.',
+  },
+  {
+    title: 'Registered Nurse',
+    interests: ['Healthcare', 'Science'],
+    description: 'Support patients by providing care, sharing health information, and working with care teams.',
+    skills: ['Empathy', 'Communication', 'Science'],
+    nextStep: 'Learn about first aid or interview a healthcare professional about their work.',
+  },
+  {
+    title: 'Health Informatics Specialist',
+    interests: ['Healthcare', 'Technology'],
+    description: 'Help care teams use health information systems to organize and improve patient care.',
+    skills: ['Technology', 'Organization', 'Communication'],
+    nextStep: 'Explore how health apps help people track information and protect privacy.',
+  },
+  {
+    title: 'Physical Therapist',
+    interests: ['Healthcare', 'Science'],
+    description: 'Help people improve movement and recover strength after an injury or illness.',
+    skills: ['Empathy', 'Biology', 'Motivation'],
+    nextStep: 'Learn how movement and exercise support health through a class or club.',
+  },
+  {
+    title: 'Graphic Designer',
+    interests: ['Arts', 'Technology'],
+    description: 'Create visual designs that help people understand ideas and connect with organizations.',
+    skills: ['Visual communication', 'Creativity', 'Digital tools'],
+    nextStep: 'Design a poster for a school activity using a free design tool.',
+  },
+  {
+    title: 'Animator',
+    interests: ['Arts', 'Technology', 'Science'],
+    description: 'Bring characters and ideas to life through motion, storytelling, and digital tools.',
+    skills: ['Drawing', 'Storytelling', 'Patience'],
+    nextStep: 'Make a short flipbook or simple animation to practice movement and timing.',
+  },
+  {
+    title: 'Technical Writer',
+    interests: ['Arts', 'Technology', 'Business'],
+    description: 'Explain products and processes clearly through guides, instructions, and online content.',
+    skills: ['Writing', 'Research', 'Organization'],
+    nextStep: 'Write a clear how-to guide for a tool or activity you know well.',
+  },
+  {
+    title: 'Environmental Scientist',
+    interests: ['Science', 'Engineering'],
+    description: 'Study the environment and help communities make informed decisions about natural resources.',
+    skills: ['Research', 'Data collection', 'Critical thinking'],
+    nextStep: 'Join a local cleanup or record observations for a school science project.',
+  },
+  {
+    title: 'Laboratory Researcher',
+    interests: ['Science', 'Healthcare'],
+    description: 'Run experiments and analyze samples to help answer questions about health and the natural world.',
+    skills: ['Curiosity', 'Careful observation', 'Data analysis'],
+    nextStep: 'Try a school science fair project and practice keeping careful notes.',
+  },
+  {
+    title: 'Data Scientist',
+    interests: ['Science', 'Technology', 'Business'],
+    description: 'Find patterns in data and explain what they can teach us about real-world questions.',
+    skills: ['Math', 'Curiosity', 'Clear communication'],
+    nextStep: 'Choose a question you care about and chart a small set of data.',
+  },
+]
+
+async function getChecklistItems() {
+  const response = await fetch('/api/checklist')
+  if (!response.ok) {
+    const body = await response.json()
+    throw new Error(body.error || 'Unable to load your checklist.')
+  }
+
+  const items = await response.json()
+  if (!Array.isArray(items)) {
+    throw new Error('The checklist response was not in the expected format.')
+  }
+  return items
+}
+
+async function getApiError(response, fallback) {
+  const body = await response.json()
+  return new Error(body.error || fallback)
+}
+
 function App() {
+  const [selectedInterests, setSelectedInterests] = useState([])
+  const [careerRecommendations, setCareerRecommendations] = useState([])
+  const [careerMessage, setCareerMessage] = useState('')
+  const [checklistItems, setChecklistItems] = useState([])
+  const [checklistLoading, setChecklistLoading] = useState(true)
+  const [checklistLoadFailed, setChecklistLoadFailed] = useState(false)
+  const [checklistError, setChecklistError] = useState('')
+  const [taskTitle, setTaskTitle] = useState('')
+  const [addingTask, setAddingTask] = useState(false)
+  const [updatingItems, setUpdatingItems] = useState(() => new Set())
+
+  useEffect(() => {
+    let active = true
+
+    getChecklistItems()
+      .then((items) => {
+        if (active) {
+          setChecklistItems(items)
+          setChecklistLoadFailed(false)
+        }
+      })
+      .catch((error) => {
+        if (active) {
+          setChecklistLoadFailed(true)
+          setChecklistError(error.message || 'Unable to load your checklist.')
+        }
+      })
+      .finally(() => {
+        if (active) setChecklistLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  async function handleAddTask(event) {
+    event.preventDefault()
+    const title = taskTitle.trim()
+    if (!title) {
+      setChecklistError('Enter a task before adding it.')
+      return
+    }
+    if (title.length > 200) {
+      setChecklistError('Task titles must be 200 characters or fewer.')
+      return
+    }
+
+    setAddingTask(true)
+    setChecklistError('')
+    try {
+      const response = await fetch('/api/checklist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title }),
+      })
+      if (!response.ok) {
+        throw await getApiError(response, 'Unable to add this task.')
+      }
+
+      const item = await response.json()
+      setChecklistItems((items) => [item, ...items])
+      setChecklistLoadFailed(false)
+      setTaskTitle('')
+    } catch (error) {
+      setChecklistError(error.message || 'Unable to add this task. Please try again.')
+    } finally {
+      setAddingTask(false)
+    }
+  }
+
+  async function handleChecklistToggle(item) {
+    setChecklistError('')
+    setUpdatingItems((items) => new Set(items).add(item.id))
+    try {
+      const response = await fetch(`/api/checklist/${item.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completed: !item.completed }),
+      })
+      if (!response.ok) {
+        throw await getApiError(response, 'Unable to update this task.')
+      }
+
+      const updatedItem = await response.json()
+      setChecklistItems((items) =>
+        items.map((currentItem) => currentItem.id === updatedItem.id ? updatedItem : currentItem),
+      )
+    } catch (error) {
+      setChecklistError(error.message || 'Unable to update this task. Please try again.')
+    } finally {
+      setUpdatingItems((items) => {
+        const nextItems = new Set(items)
+        nextItems.delete(item.id)
+        return nextItems
+      })
+    }
+  }
+
+  const incompleteItems = checklistItems.filter((item) => !item.completed)
+  const completedItems = checklistItems.filter((item) => item.completed)
+
+  function handleInterestChange(interest) {
+    setSelectedInterests((interests) =>
+      interests.includes(interest)
+        ? interests.filter((selectedInterest) => selectedInterest !== interest)
+        : [...interests, interest],
+    )
+    setCareerRecommendations([])
+    setCareerMessage('')
+  }
+
+  function handleFindCareers(event) {
+    event.preventDefault()
+    if (selectedInterests.length === 0) {
+      setCareerRecommendations([])
+      setCareerMessage('Choose at least one interest to find careers that may fit you.')
+      return
+    }
+
+    const matches = careerOptions
+      .map((career) => ({
+        career,
+        matchCount: career.interests.filter((interest) => selectedInterests.includes(interest)).length,
+      }))
+      .filter(({ matchCount }) => matchCount > 0)
+      .sort((first, second) => {
+        const matchDifference = second.matchCount - first.matchCount
+        if (matchDifference !== 0) return matchDifference
+
+        const firstLeadInterestMatches = selectedInterests.includes(first.career.interests[0])
+        const secondLeadInterestMatches = selectedInterests.includes(second.career.interests[0])
+        return Number(secondLeadInterestMatches) - Number(firstLeadInterestMatches)
+      })
+      .slice(0, 3)
+      .map(({ career }) => career)
+
+    setCareerRecommendations(matches)
+    setCareerMessage('')
+  }
+
+  function renderChecklistItems(items) {
+    return (
+      <ul className="checklist-items">
+        {items.map((item) => (
+          <li className={`checklist-item${item.completed ? ' is-complete' : ''}`} key={item.id}>
+            <label className="checklist-label">
+              <input
+                type="checkbox"
+                checked={item.completed}
+                disabled={updatingItems.has(item.id)}
+                onChange={() => handleChecklistToggle(item)}
+                aria-label={`${item.completed ? 'Mark incomplete' : 'Mark complete'}: ${item.title}`}
+              />
+              <span>{item.title}</span>
+            </label>
+            {updatingItems.has(item.id) && <span className="task-saving">Saving...</span>}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
   return (
     <div className="page">
       <header className="site-header">
@@ -20,16 +341,96 @@ function App() {
           </p>
         </section>
 
-        <section className="placeholders" aria-label="Coming soon">
-          <article id="career-recommendations" className="placeholder-card">
-            <p className="eyebrow">Coming soon</p>
-            <h2>Career Recommendations</h2>
-            <p>Discover career paths to explore in a future update.</p>
+        <section className="placeholders" aria-label="CollegePath features">
+          <article id="career-recommendations" className="career-card" aria-labelledby="career-heading">
+            <p className="eyebrow">Explore what interests you</p>
+            <h2 id="career-heading">Career Recommendations</h2>
+            <p className="career-intro">Choose a few topics you enjoy and discover careers to explore.</p>
+
+            <form className="career-form" onSubmit={handleFindCareers}>
+              <fieldset className="interest-fieldset">
+                <legend>Your interests</legend>
+                <div className="interest-options">
+                  {interestCategories.map((interest) => (
+                    <label className="interest-option" key={interest}>
+                      <input
+                        type="checkbox"
+                        checked={selectedInterests.includes(interest)}
+                        onChange={() => handleInterestChange(interest)}
+                      />
+                      <span>{interest}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              <button className="career-submit" type="submit">Find My Careers</button>
+            </form>
+
+            {careerMessage && <p className="career-message" role="status">{careerMessage}</p>}
+
+            {careerRecommendations.length > 0 && (
+              <section className="career-results" aria-live="polite" aria-labelledby="career-results-heading">
+                <h3 id="career-results-heading">Careers to explore</h3>
+                <div className="career-results-list">
+                  {careerRecommendations.map((career) => (
+                    <article className="career-result" key={career.title}>
+                      <h4>{career.title}</h4>
+                      <p>{career.description}</p>
+                      <p><strong>Useful skills:</strong> {career.skills.join(', ')}</p>
+                      <p><strong>Try this next:</strong> {career.nextStep}</p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            )}
           </article>
-          <article id="my-checklist" className="placeholder-card">
-            <p className="eyebrow">Coming soon</p>
-            <h2>My Checklist</h2>
-            <p>Keep track of your college planning steps in a future update.</p>
+          <article id="my-checklist" className="checklist-card" aria-labelledby="checklist-heading">
+            <p className="eyebrow">One step at a time</p>
+            <h2 id="checklist-heading">My Checklist</h2>
+            <p className="checklist-intro">Keep your college planning tasks organized and celebrate each step forward.</p>
+
+            <form className="checklist-form" onSubmit={handleAddTask}>
+              <label htmlFor="task-title">Add a task</label>
+              <div className="checklist-form-controls">
+                <input
+                  id="task-title"
+                  name="title"
+                  type="text"
+                  value={taskTitle}
+                  onChange={(event) => setTaskTitle(event.target.value)}
+                  placeholder="For example, research application deadlines"
+                  maxLength={200}
+                  required
+                />
+                <button type="submit" disabled={addingTask}>
+                  {addingTask ? 'Adding...' : 'Add task'}
+                </button>
+              </div>
+              <span className="input-hint">Up to 200 characters</span>
+            </form>
+
+            {checklistError && <p className="checklist-error" role="alert">{checklistError}</p>}
+
+            {checklistLoading ? (
+              <p className="checklist-status" role="status">Loading your checklist...</p>
+            ) : checklistItems.length === 0 && !checklistLoadFailed ? (
+              <p className="checklist-empty">Your checklist is ready when you are. Add your first task above to get started.</p>
+            ) : (
+              <div className="checklist-groups" aria-live="polite">
+                {incompleteItems.length > 0 && (
+                  <section className="checklist-group" aria-labelledby="up-next-heading">
+                    <h3 id="up-next-heading">Up next <span>{incompleteItems.length}</span></h3>
+                    {renderChecklistItems(incompleteItems)}
+                  </section>
+                )}
+                {completedItems.length > 0 && (
+                  <section className="checklist-group completed-group" aria-labelledby="completed-heading">
+                    <h3 id="completed-heading">Completed <span>{completedItems.length}</span></h3>
+                    {renderChecklistItems(completedItems)}
+                  </section>
+                )}
+              </div>
+            )}
           </article>
         </section>
       </main>

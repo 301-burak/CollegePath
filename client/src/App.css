@@ -104,6 +104,316 @@ h1 {
   color: #65736b;
 }
 
+.career-card {
+  padding: 28px;
+  border: 1px solid #e5e1d7;
+  border-radius: 14px;
+  background: #fffefa;
+}
+
+.career-card h2 {
+  margin-bottom: 10px;
+  font-size: 1.35rem;
+}
+
+.career-intro {
+  color: #65736b;
+}
+
+.career-form {
+  margin-top: 24px;
+}
+
+.interest-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.interest-fieldset legend {
+  margin-bottom: 10px;
+  color: #34443d;
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+
+.interest-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.interest-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 9px 11px;
+  border: 1px solid #e5e7dd;
+  border-radius: 8px;
+  background: #fffefa;
+  color: #34443d;
+  cursor: pointer;
+}
+
+.interest-option:has(input:checked) {
+  border-color: #8db9a2;
+  background: #f0f5ef;
+}
+
+.interest-option input {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: #39745e;
+}
+
+.interest-option input:focus-visible,
+.career-submit:focus-visible {
+  outline: 3px solid #8db9a2;
+  outline-offset: 2px;
+}
+
+.career-submit {
+  margin-top: 16px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: #275b4b;
+  color: #fff;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.career-submit:hover {
+  background: #1d493b;
+}
+
+.career-message {
+  margin-top: 18px;
+  padding: 13px 15px;
+  border-radius: 8px;
+  background: #f2f5ef;
+  color: #53665b;
+}
+
+.career-results {
+  margin-top: 26px;
+}
+
+.career-results > h3 {
+  margin: 0 0 12px;
+  color: #253b32;
+  font-size: 1.05rem;
+}
+
+.career-results-list {
+  display: grid;
+  gap: 12px;
+}
+
+.career-result {
+  padding: 16px;
+  border: 1px solid #e8e4da;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.career-result h4 {
+  margin: 0 0 8px;
+  color: #275b4b;
+  font-size: 1rem;
+}
+
+.career-result p {
+  color: #65736b;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.career-result p + p {
+  margin-top: 8px;
+}
+
+.career-result strong {
+  color: #34443d;
+}
+
+.checklist-card {
+  padding: 28px;
+  border: 1px solid #e5e1d7;
+  border-radius: 14px;
+  background: #fffefa;
+}
+
+.checklist-card h2 {
+  margin-bottom: 10px;
+  font-size: 1.35rem;
+}
+
+.checklist-intro,
+.input-hint {
+  color: #65736b;
+}
+
+.checklist-form {
+  margin-top: 24px;
+}
+
+.checklist-form > label {
+  display: block;
+  margin-bottom: 8px;
+  color: #34443d;
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+
+.checklist-form-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.checklist-form-controls input {
+  min-width: 0;
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid #cbd4cb;
+  border-radius: 8px;
+  color: #34443d;
+  font: inherit;
+}
+
+.checklist-form-controls input:focus-visible,
+.checklist-form-controls button:focus-visible,
+.checklist-label input:focus-visible {
+  outline: 3px solid #8db9a2;
+  outline-offset: 2px;
+}
+
+.checklist-form-controls button {
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: #275b4b;
+  color: #fff;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.checklist-form-controls button:hover:not(:disabled) {
+  background: #1d493b;
+}
+
+.checklist-form-controls button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.input-hint {
+  display: block;
+  margin-top: 7px;
+  font-size: 0.78rem;
+}
+
+.checklist-error,
+.checklist-status,
+.checklist-empty {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border-radius: 8px;
+}
+
+.checklist-error {
+  background: #fff0ed;
+  color: #9e3327;
+}
+
+.checklist-status,
+.checklist-empty {
+  background: #f2f5ef;
+  color: #53665b;
+}
+
+.checklist-groups {
+  margin-top: 26px;
+}
+
+.checklist-group + .checklist-group {
+  margin-top: 24px;
+}
+
+.checklist-group h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 10px;
+  color: #34443d;
+  font-size: 0.95rem;
+}
+
+.checklist-group h3 span {
+  display: inline-grid;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  place-items: center;
+  border-radius: 999px;
+  background: #edf1e9;
+  color: #53665b;
+  font-size: 0.75rem;
+}
+
+.checklist-items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 10px 12px;
+  border-top: 1px solid #eeece5;
+}
+
+.checklist-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  color: #34443d;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.checklist-label input {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: #39745e;
+  cursor: pointer;
+}
+
+.checklist-label input:disabled {
+  cursor: wait;
+}
+
+.is-complete .checklist-label span {
+  color: #76827a;
+  text-decoration: line-through;
+}
+
+.task-saving {
+  flex: none;
+  color: #718078;
+  font-size: 0.78rem;
+}
+
 footer {
   max-width: 1100px;
   margin: 0 auto;
@@ -130,6 +440,19 @@ footer {
 
   .placeholders {
     grid-template-columns: 1fr;
+  }
+
+  .checklist-card {
+    padding: 22px;
+  }
+
+  .career-card {
+    padding: 22px;
+  }
+
+  .checklist-form-controls {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   footer {

@@ -1,5 +1,9 @@
 import express from 'express'
-import { getChecklistItems, createChecklistItem } from './src/database.js'
+import {
+  getChecklistItems,
+  createChecklistItem,
+  updateChecklistItemCompletion,
+} from './src/database.js'
 
 const app = express()
 const port = Number(process.env.PORT) || 3001
@@ -34,6 +38,33 @@ app.post('/api/checklist', (request, response, next) => {
   try {
     const item = createChecklistItem(title.trim(), completed)
     response.status(201).json(item)
+  } catch (error) {
+    next(error)
+  }
+})
+
+app.patch('/api/checklist/:id', (request, response, next) => {
+  const id = Number(request.params.id)
+  const { completed } = request.body ?? {}
+
+  if (!Number.isSafeInteger(id) || id < 1) {
+    response.status(400).json({ error: 'Checklist item ID must be a positive integer.' })
+    return
+  }
+
+  if (typeof completed !== 'boolean') {
+    response.status(400).json({ error: 'Completed must be a boolean.' })
+    return
+  }
+
+  try {
+    const item = updateChecklistItemCompletion(id, completed)
+    if (!item) {
+      response.status(404).json({ error: 'Checklist item not found.' })
+      return
+    }
+
+    response.json(item)
   } catch (error) {
     next(error)
   }

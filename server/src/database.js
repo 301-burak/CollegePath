@@ -35,6 +35,12 @@ const getItem = database.prepare(`
   WHERE id = ?
 `)
 
+const updateItemCompletion = database.prepare(`
+  UPDATE checklist_items
+  SET completed = ?
+  WHERE id = ?
+`)
+
 function toChecklistItem(row) {
   return { ...row, completed: Boolean(row.completed) }
 }
@@ -46,4 +52,10 @@ export function getChecklistItems() {
 export function createChecklistItem(title, completed) {
   const result = insertItem.run(title, completed ? 1 : 0)
   return toChecklistItem(getItem.get(result.lastInsertRowid))
+}
+
+export function updateChecklistItemCompletion(id, completed) {
+  const result = updateItemCompletion.run(completed ? 1 : 0, id)
+  if (result.changes === 0) return null
+  return toChecklistItem(getItem.get(id))
 }
