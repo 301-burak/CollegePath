@@ -142,8 +142,7 @@ const careerOptions = [
 async function getChecklistItems() {
   const response = await fetch('/api/checklist')
   if (!response.ok) {
-    const body = await response.json()
-    throw new Error(body.error || 'Unable to load your checklist.')
+    throw await getApiError(response, 'Unable to load your checklist.')
   }
 
   const items = await response.json()
@@ -154,8 +153,12 @@ async function getChecklistItems() {
 }
 
 async function getApiError(response, fallback) {
-  const body = await response.json()
-  return new Error(body.error || fallback)
+  try {
+    const body = await response.json()
+    return new Error(body.error || fallback)
+  } catch {
+    return new Error(fallback)
+  }
 }
 
 function App() {
