@@ -113,3 +113,30 @@ No application bug or feature was fixed for Lesson 16. The documentation was cre
 - Browser keyboard interaction selected Technology and Engineering and submitted the form: Technology returned three results (`Software Developer`, `Cybersecurity Analyst`, and `UX Designer`); Engineering returned three (`Civil Engineer`, `Mechanical Engineer`, and `Biomedical Engineer`); Technology + Engineering returned three results; and submitting with no interests displayed the friendly prompt.
 - Browser pointer-click automation on the Technology checkbox timed out because the parent career article was reported as intercepting the pointer event. The keyboard interaction did verify the recommendation flow, but this automation attempt does not establish a successful mouse interaction check or demonstrate an application defect. No application code was changed.
 - No server restart or page-refresh persistence test was performed specifically for the newly added Lesson 16 demo rows.
+
+## CollegePath 2.0 Phase 2: Student Academic Profile
+
+### Asked
+Implement the Academic Profile feature on `feature/collegepath-v2`: let the single local student save grade level, weighted and unweighted GPA, courses, and SAT/ACT scores; edit or delete course and test-score entries; validate inputs; preserve the existing checklist and career recommender; keep the API local-only; test build, lint, API, and SQLite persistence; and do not commit, push, or deploy.
+
+### Got
+- Added a responsive Academic Profile section and navigation link with grade/GPA fields, course and test-score forms, edit/delete controls, summary counts, empty states, loading indicators, and visible request errors.
+- Added API routes for profile GET/PUT, course GET/POST/PUT/DELETE, and test-score GET/POST/PUT/DELETE. GPA values accept 0–10 as a broad form-entry range; grades accept A–F with optional +/- or percentages from 0–100; SAT sections accept 200–800; ACT Composite accepts 1–36; dates are validated.
+- Added transactional, version-tracked SQLite migration `001_academic_profile.sql` for the single local profile, courses, and test scores. Existing `checklist_items` rows are not rewritten or deleted.
+- Bound Express to `127.0.0.1`, directed Vite's `/api` proxy to that loopback address, and documented that the unauthenticated prototype must not be shared, forwarded, or deployed.
+- Added `npm test` using Node's built-in test runner and temporary SQLite databases. Updated README setup, endpoints, validation, migration, privacy, and test instructions.
+- No university tracking or action-plan functionality was added.
+
+### Fixed
+No pre-existing application bug was targeted. The academic profile functionality was added without replacing the existing career recommendation or checklist flows.
+
+### Verified
+- `npm run build` in `client/` completed successfully.
+- `npm run lint` in `client/` completed successfully with no warnings.
+- `npm test` in `server/` passed: 1 test, 0 failures. The isolated API/persistence test covered profile and course/test-score validation and CRUD, migration re-open/persistence, checklist GET/POST/PATCH behavior, and preservation of a pre-existing checklist record in its temporary SQLite database.
+- `node --check` passed for `server/index.js`, `server/app.js`, `server/src/database.js`, and `server/test/academic-profile.test.js`.
+- The existing local database migrated in place: the profile initialized with blank fields, course and score tables started empty, and one migration was recorded. Its four checklist rows remained unchanged; a read-only SQLite query matched the checklist API response, including completion states.
+- Browser verification on the local app saved and cleared a profile, added/edited/deleted a course and test score, restored both empty states, and confirmed the existing checklist and Technology career recommendations remained available. A 390-pixel viewport had no horizontal overflow; the exercised page produced no failed HTTP responses or Console errors.
+- The student manually verified saving grade level and GPA, adding a high school course and grade, saving SAT Math and SAT Reading and Writing scores, then refreshing and confirming the data persisted. This manual check was reported by the student; no private academic values were added to this log.
+- The frontend and backend were verified on local ports `5174` and `3001`, with Express bound to `127.0.0.1`.
+- No university tracking or action-plan work was included in this phase.

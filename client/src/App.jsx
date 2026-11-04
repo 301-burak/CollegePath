@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import AcademicProfile from './AcademicProfile.jsx'
 import './App.css'
 
 const interestCategories = [
@@ -330,6 +331,7 @@ function App() {
       <header className="site-header">
         <a className="brand" href="#" aria-label="CollegePath home">CollegePath</a>
         <nav aria-label="Main navigation">
+          <a href="#academic-profile">Academic Profile</a>
           <a href="#career-recommendations">Career Recommendations</a>
           <a href="#my-checklist">My Checklist</a>
         </nav>
@@ -342,6 +344,14 @@ function App() {
           <p className="intro">
             Explore your path to college and career, one step at a time.
           </p>
+        </section>
+
+        <section
+          id="academic-profile"
+          className="academic-section"
+          aria-labelledby="academic-profile-heading"
+        >
+          <AcademicProfile />
         </section>
 
         <section className="placeholders" aria-label="CollegePath features">

@@ -87,6 +87,11 @@ h1 {
   gap: 20px;
 }
 
+.academic-section {
+  margin-bottom: 28px;
+  scroll-margin-top: 20px;
+}
+
 .placeholder-card {
   min-height: 190px;
   padding: 28px;
