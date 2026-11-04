@@ -8,8 +8,10 @@ The application is intended for high school students exploring possible careers 
 
 ## Features
 
-- Select interests in Technology, Engineering, Business, Healthcare, Arts, and Science to see three related career suggestions.
-- Review each career's description, useful skills, and a suggested next step for a high school student.
+- Select interests in Technology, Engineering, Business, Healthcare, Arts, Science, and Law to see related career suggestions.
+- Explore curated Cybersecurity, Software Engineering/Computer Science, Mechanical Engineering, Medicine/Healthcare, Business/Finance, and Law roadmaps from relevant career suggestions.
+- Review pathway course ideas, advanced course options, technical and people skills, optional activities, project ideas, and flexible grade-by-grade suggestions.
+- See how saved courses connect to a pathway and which additional subjects a student could explore. Roadmaps use local rule-based guidance, not external AI.
 - Save a local academic profile with grade level, weighted and unweighted GPA, courses, and SAT/ACT scores.
 - Add, edit, and delete course and test-score entries; enter letter or percentage grades and optional test dates.
 - Create checklist items and mark them complete or incomplete.
@@ -127,6 +129,7 @@ Run the frontend checks from `client/`:
 ```sh
 npm run build
 npm run lint
+npm test
 ```
 
 Run the isolated API and SQLite migration/persistence tests from `server/`:

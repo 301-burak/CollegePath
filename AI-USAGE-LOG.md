@@ -140,3 +140,34 @@ No pre-existing application bug was targeted. The academic profile functionality
 - The student manually verified saving grade level and GPA, adding a high school course and grade, saving SAT Math and SAT Reading and Writing scores, then refreshing and confirming the data persisted. This manual check was reported by the student; no private academic values were added to this log.
 - The frontend and backend were verified on local ports `5174` and `3001`, with Express bound to `127.0.0.1`.
 - No university tracking or action-plan work was included in this phase.
+
+## CollegePath 2.0 Phase 3: Personalized Career Pathway Roadmaps
+
+### Asked
+Expand Career Recommendations with curated Cybersecurity, Software Engineering/Computer Science, Mechanical Engineering, Medicine/Healthcare, Business/Finance, and Law roadmaps. Each roadmap should explain relevant courses and advanced options, skills, extracurricular ideas, projects, and flexible grade 9–12 milestones, and use the student's saved courses to personalize suggestions. Preserve academic profile and checklist data and features; use no external AI or admissions claims; add tests; do not commit, push, merge, or deploy.
+
+### Got
+- Added six curated, rule-based pathway catalogs with descriptions, related careers, course suggestions and advanced options, technical and soft skills, optional activities/competitions, project ideas, and grade-by-grade suggestions.
+- Added `View Roadmap` actions to career recommendation cards while retaining the existing interest matcher and its top-three behavior. Added Software Engineer and Lawyer recommendations and a Law interest category.
+- Added profile-aware course matching: related courses are acknowledged and no longer repeated as missing suggestions. For example, AP Computer Science coursework connects to the cybersecurity pathway while networking and other topics remain possible next steps.
+- Added accessible, responsive roadmap details and course-loading states with retry and a general-roadmap fallback when profile loading fails. Guidance explicitly labels classes and extracurriculars as suggestions, not requirements.
+- Added five frontend unit tests for career selection, all six roadmap models and grade levels, course personalization, empty academic profiles, and profile-fetch failure/invalid-response handling. Documented Phase 3 and the frontend test command in the README.
+- No university tracking, action plan, admissions requirements, or external AI service was added.
+
+### Fixed
+No pre-existing bug was targeted. Existing Academic Profile and My Checklist data and behavior were left intact.
+
+### Verified
+- `npm test` in `client/` passed: 5 tests, 0 failures.
+- `npm run build` and `npm run lint` in `client/` completed successfully.
+- `npm test` in `server/` passed: 1 API/SQLite persistence test, 0 failures.
+- Browser-tested the existing Technology recommendations and roadmap buttons, a Cybersecurity roadmap personalized with a mocked AP Computer Science course, Law selection and its grade 9–12 roadmap, and a mocked profile API failure with retry/general-roadmap options.
+- At a 375 CSS-pixel viewport, the page had no horizontal overflow. The local profile API and checklist remained available; browser tests used mocked profile data and did not add, delete, or overwrite saved academic or checklist records.
+- During implementation, no push, merge, or deployment was performed.
+
+### Final Phase 3 Verification
+- Verified Law, Cybersecurity, and Mechanical Engineering in the live browser. Each rendered recommended courses, technical and soft skills, extracurricular suggestions, personal project ideas, and roadmap sections for grades 9–12.
+- Verified personalization against the existing local Academic Profile without changing it: Cybersecurity and Mechanical Engineering each recognized one saved course area; Law correctly stated that saved courses are a useful starting point and showed additional suggestions.
+- Read-only checks confirmed the profile/courses/test-score counts matched the profile API, and all four existing checklist items matched the checklist API and SQLite contents.
+- Final `npm test` in `client/` passed all five tests; `npm run build` and `npm run lint` passed. Final `npm test` in `server/` passed its API/SQLite persistence test.
+- No local student values were copied into this log. No merge or deployment was performed.

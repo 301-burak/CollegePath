@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import AcademicProfile from './AcademicProfile.jsx'
+import CareerRoadmap from './CareerRoadmap.jsx'
+import { careerPathways, getCareerRecommendations } from './careerPathways.js'
 import './App.css'
 
 const interestCategories = [
@@ -9,11 +11,13 @@ const interestCategories = [
   'Healthcare',
   'Arts',
   'Science',
+  'Law',
 ]
 
 const careerOptions = [
   {
     title: 'Software Developer',
+    pathwayId: 'software-engineering',
     interests: ['Technology', 'Science'],
     description: 'Build apps and tools that help people solve everyday problems.',
     skills: ['Problem-solving', 'Logical thinking', 'Teamwork'],
@@ -21,6 +25,7 @@ const careerOptions = [
   },
   {
     title: 'Cybersecurity Analyst',
+    pathwayId: 'cybersecurity',
     interests: ['Technology', 'Business'],
     description: 'Help organizations protect their computers, information, and people.',
     skills: ['Attention to detail', 'Critical thinking', 'Communication'],
@@ -28,6 +33,7 @@ const careerOptions = [
   },
   {
     title: 'UX Designer',
+    pathwayId: 'software-engineering',
     interests: ['Technology', 'Arts'],
     description: 'Make websites and apps easier and more enjoyable for people to use.',
     skills: ['Creativity', 'Empathy', 'Visual communication'],
@@ -35,6 +41,7 @@ const careerOptions = [
   },
   {
     title: 'Civil Engineer',
+    pathwayId: 'mechanical-engineering',
     interests: ['Engineering', 'Science'],
     description: 'Plan and improve structures and systems such as roads, bridges, and water networks.',
     skills: ['Math', 'Planning', 'Problem-solving'],
@@ -42,6 +49,7 @@ const careerOptions = [
   },
   {
     title: 'Mechanical Engineer',
+    pathwayId: 'mechanical-engineering',
     interests: ['Engineering', 'Technology'],
     description: 'Design and test machines and devices that make work safer or easier.',
     skills: ['Math', 'Design', 'Hands-on problem-solving'],
@@ -49,6 +57,7 @@ const careerOptions = [
   },
   {
     title: 'Biomedical Engineer',
+    pathwayId: 'medicine-healthcare',
     interests: ['Engineering', 'Healthcare'],
     description: 'Create equipment and technology that support patient care and health research.',
     skills: ['Science', 'Design', 'Collaboration'],
@@ -56,6 +65,7 @@ const careerOptions = [
   },
   {
     title: 'Marketing Manager',
+    pathwayId: 'business-finance',
     interests: ['Business', 'Arts'],
     description: 'Help organizations share what they offer through thoughtful campaigns and stories.',
     skills: ['Writing', 'Creativity', 'Communication'],
@@ -63,6 +73,7 @@ const careerOptions = [
   },
   {
     title: 'Financial Analyst',
+    pathwayId: 'business-finance',
     interests: ['Business', 'Technology'],
     description: 'Use data to help organizations understand budgets, investments, and plans.',
     skills: ['Math', 'Data analysis', 'Attention to detail'],
@@ -70,6 +81,7 @@ const careerOptions = [
   },
   {
     title: 'Entrepreneur',
+    pathwayId: 'business-finance',
     interests: ['Business', 'Technology', 'Arts'],
     description: 'Turn an idea into a product or service that meets a real need.',
     skills: ['Initiative', 'Planning', 'Communication'],
@@ -77,6 +89,7 @@ const careerOptions = [
   },
   {
     title: 'Registered Nurse',
+    pathwayId: 'medicine-healthcare',
     interests: ['Healthcare', 'Science'],
     description: 'Support patients by providing care, sharing health information, and working with care teams.',
     skills: ['Empathy', 'Communication', 'Science'],
@@ -84,6 +97,7 @@ const careerOptions = [
   },
   {
     title: 'Health Informatics Specialist',
+    pathwayId: 'medicine-healthcare',
     interests: ['Healthcare', 'Technology'],
     description: 'Help care teams use health information systems to organize and improve patient care.',
     skills: ['Technology', 'Organization', 'Communication'],
@@ -91,6 +105,7 @@ const careerOptions = [
   },
   {
     title: 'Physical Therapist',
+    pathwayId: 'medicine-healthcare',
     interests: ['Healthcare', 'Science'],
     description: 'Help people improve movement and recover strength after an injury or illness.',
     skills: ['Empathy', 'Biology', 'Motivation'],
@@ -98,6 +113,7 @@ const careerOptions = [
   },
   {
     title: 'Graphic Designer',
+    pathwayId: 'software-engineering',
     interests: ['Arts', 'Technology'],
     description: 'Create visual designs that help people understand ideas and connect with organizations.',
     skills: ['Visual communication', 'Creativity', 'Digital tools'],
@@ -105,6 +121,7 @@ const careerOptions = [
   },
   {
     title: 'Animator',
+    pathwayId: 'software-engineering',
     interests: ['Arts', 'Technology', 'Science'],
     description: 'Bring characters and ideas to life through motion, storytelling, and digital tools.',
     skills: ['Drawing', 'Storytelling', 'Patience'],
@@ -112,6 +129,7 @@ const careerOptions = [
   },
   {
     title: 'Technical Writer',
+    pathwayId: 'law',
     interests: ['Arts', 'Technology', 'Business'],
     description: 'Explain products and processes clearly through guides, instructions, and online content.',
     skills: ['Writing', 'Research', 'Organization'],
@@ -119,6 +137,7 @@ const careerOptions = [
   },
   {
     title: 'Environmental Scientist',
+    pathwayId: 'medicine-healthcare',
     interests: ['Science', 'Engineering'],
     description: 'Study the environment and help communities make informed decisions about natural resources.',
     skills: ['Research', 'Data collection', 'Critical thinking'],
@@ -126,6 +145,7 @@ const careerOptions = [
   },
   {
     title: 'Laboratory Researcher',
+    pathwayId: 'medicine-healthcare',
     interests: ['Science', 'Healthcare'],
     description: 'Run experiments and analyze samples to help answer questions about health and the natural world.',
     skills: ['Curiosity', 'Careful observation', 'Data analysis'],
@@ -133,10 +153,27 @@ const careerOptions = [
   },
   {
     title: 'Data Scientist',
+    pathwayId: 'software-engineering',
     interests: ['Science', 'Technology', 'Business'],
     description: 'Find patterns in data and explain what they can teach us about real-world questions.',
     skills: ['Math', 'Curiosity', 'Clear communication'],
     nextStep: 'Choose a question you care about and chart a small set of data.',
+  },
+  {
+    title: 'Software Engineer',
+    pathwayId: 'software-engineering',
+    interests: ['Technology', 'Science'],
+    description: 'Design, build, and improve software by combining programming with teamwork and testing.',
+    skills: ['Programming', 'Problem-solving', 'Collaboration'],
+    nextStep: 'Build a small tool or website and ask someone to try it.',
+  },
+  {
+    title: 'Lawyer',
+    pathwayId: 'law',
+    interests: ['Law', 'Business'],
+    description: 'Research legal questions and help people or organizations understand their rights and responsibilities.',
+    skills: ['Reading', 'Writing', 'Reasoning'],
+    nextStep: 'Explore a civics, debate, or mock-trial activity at school.',
   },
 ]
 
@@ -166,6 +203,7 @@ function App() {
   const [selectedInterests, setSelectedInterests] = useState([])
   const [careerRecommendations, setCareerRecommendations] = useState([])
   const [careerMessage, setCareerMessage] = useState('')
+  const [selectedPathwayId, setSelectedPathwayId] = useState(null)
   const [checklistItems, setChecklistItems] = useState([])
   const [checklistLoading, setChecklistLoading] = useState(true)
   const [checklistLoadFailed, setChecklistLoadFailed] = useState(false)
@@ -273,6 +311,7 @@ function App() {
     )
     setCareerRecommendations([])
     setCareerMessage('')
+    setSelectedPathwayId(null)
   }
 
   function handleFindCareers(event) {
@@ -280,28 +319,13 @@ function App() {
     if (selectedInterests.length === 0) {
       setCareerRecommendations([])
       setCareerMessage('Choose at least one interest to find careers that may fit you.')
+      setSelectedPathwayId(null)
       return
     }
 
-    const matches = careerOptions
-      .map((career) => ({
-        career,
-        matchCount: career.interests.filter((interest) => selectedInterests.includes(interest)).length,
-      }))
-      .filter(({ matchCount }) => matchCount > 0)
-      .sort((first, second) => {
-        const matchDifference = second.matchCount - first.matchCount
-        if (matchDifference !== 0) return matchDifference
-
-        const firstLeadInterestMatches = selectedInterests.includes(first.career.interests[0])
-        const secondLeadInterestMatches = selectedInterests.includes(second.career.interests[0])
-        return Number(secondLeadInterestMatches) - Number(firstLeadInterestMatches)
-      })
-      .slice(0, 3)
-      .map(({ career }) => career)
-
-    setCareerRecommendations(matches)
+    setCareerRecommendations(getCareerRecommendations(careerOptions, selectedInterests))
     setCareerMessage('')
+    setSelectedPathwayId(null)
   }
 
   function renderChecklistItems(items) {
@@ -391,10 +415,23 @@ function App() {
                       <p>{career.description}</p>
                       <p><strong>Useful skills:</strong> {career.skills.join(', ')}</p>
                       <p><strong>Try this next:</strong> {career.nextStep}</p>
+                      <button
+                        className="career-submit roadmap-open-button"
+                        type="button"
+                        onClick={() => setSelectedPathwayId(career.pathwayId)}
+                      >
+                        View Roadmap
+                      </button>
                     </article>
                   ))}
                 </div>
               </section>
+            )}
+            {selectedPathwayId && (
+              <CareerRoadmap
+                pathway={careerPathways.find((pathway) => pathway.id === selectedPathwayId)}
+                onClose={() => setSelectedPathwayId(null)}
+              />
             )}
           </article>
           <article id="my-checklist" className="checklist-card" aria-labelledby="checklist-heading">
