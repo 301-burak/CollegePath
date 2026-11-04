@@ -198,3 +198,31 @@ Add a local university search and goal tracker for Harvard, MIT, Stanford, UT Au
 - `.gitignore` covers SQLite/database files, `.env` secrets, and `node_modules`; `git ls-files` showed no such files tracked.
 - Local test URLs: `http://127.0.0.1:5174/#my-universities` (frontend) and `http://127.0.0.1:3001/api/universities` (local catalog API). Express remains loopback-bound.
 - Work remains uncommitted on `feature/collegepath-v2`; no push, merge, or deployment was performed.
+
+## CollegePath 2.0 Phase 5: Personalized Action Plan
+
+### Asked
+Build a local, rule-based action plan from saved academic data, a selected career pathway, saved university goals, and existing checklist tasks. Include courses, test preparation, optional activities and projects, official-source university reminders, priorities and reasons; let students add recommendations to My Checklist without duplicates. Preserve existing data and features; do not add authentication, external AI, admissions predictions, or a commit/push/deployment.
+
+### Got
+- Added a responsive “My Action Plan” section with an explicit pathway selector. Opening a career roadmap also selects that pathway for the plan. A refresh control reloads profile and university information after students update those sections.
+- Added a rule-based recommendation engine that reuses the existing pathway course, activity, and project catalog, identifies saved course matches, acknowledges saved GPA and SAT/ACT records without applying score/GPA cutoffs, and adjusts priority by grade.
+- Added explainable suggestions in the requested categories, including school-availability caveats for course ideas and explicit incomplete-profile context. When no university goals are saved, the plan asks the student to select one instead of generating school-specific claims.
+- For saved universities, added separate requirement, deadline, and testing-policy follow-ups with official source links. Verified facts carry their source and verification date; unverified facts link to the official admissions site and are clearly labeled rather than repeated as facts.
+- Added a duplicate-safe `POST /api/checklist/recommendation` route backed by the existing SQLite checklist table. It validates titles, atomically detects case-insensitive duplicates, returns the existing task with HTTP 409, and persists new recommendations using the existing checklist records and completion controls. No migration or new student-data table was needed.
+- Updated the README with action-plan and API documentation. No existing profile, goal, or checklist records were altered during verification.
+
+### Fixed
+- Removed an unused helper and corrected checklist-add callback placement after lint detected both issues.
+- Kept a failed checklist load visible when a recommendation is added, avoiding a misleading display of a partial checklist.
+- Made recommendation title duplicate detection resilient to case and surrounding whitespace in both the UI and API.
+
+### Verified
+- `npm test` in `client/` passed all 13 tests, including all six pathways, course personalization, missing profile details, no university goals, verified/unverified university sources, GPA/test-score acknowledgment, duplicate tracking, and API error/malformed-data handling.
+- `npm run lint` and `npm run build` in `client/` passed.
+- `npm test` in `server/` passed all 3 API/SQLite tests, including invalid input, case-insensitive duplicate prevention, persistence after reopening SQLite, and regressions preserving profile/checklist data.
+- Browser-tested all six pathway selections and confirmed each rendered course, activity, and project suggestions. A mocked checklist-add response updated the visible checklist and changed the recommendation to “In My Checklist”; the real local database was not written by this browser check.
+- Simulated an Academic Profile API failure in the browser, confirmed a friendly error, and verified retry restored the plan.
+- At a 390px mobile viewport, the document width was 375px, with no horizontal overflow.
+- Read-only local API checks confirmed the Academic Profile, its saved course/test-score collections, existing checklist, and saved university goals remain available. No database or migration files were added or modified, and no existing saved records were changed.
+- The feature remains uncommitted on `feature/collegepath-v2`; no push, merge, or deployment was performed.

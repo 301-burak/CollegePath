@@ -187,6 +187,24 @@ export function createApp(store) {
     response.status(201).json(store.createChecklistItem(title.trim(), completed))
   }))
 
+  app.post('/api/checklist/recommendation', handle((request, response) => {
+    const { title } = request.body ?? {}
+    if (typeof title !== 'string' || title.trim().length === 0 || title.trim().length > 200) {
+      response.status(400).json({ error: 'Title must be a non-empty string of at most 200 characters.' })
+      return
+    }
+
+    const result = store.createChecklistRecommendation(title.trim())
+    if (!result.created) {
+      response.status(409).json({
+        error: 'This recommendation is already in your checklist.',
+        item: result.item,
+      })
+      return
+    }
+    response.status(201).json(result.item)
+  }))
+
   app.patch('/api/checklist/:id', handle((request, response) => {
     const id = parseId(request, response)
     if (id === null) return

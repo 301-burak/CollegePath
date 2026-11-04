@@ -341,3 +341,65 @@ test('university catalog search and goals validate, persist, and expose sourced 
   assert.equal((await jsonRequest('/api/university-goals/0', { method: 'DELETE' }))
     .response.status, 400)
 })
+
+test('action plan checklist additions validate, prevent duplicate recommendations, and persist', async (t) => {
+  const databasePath = path.join(temporaryDirectory, 'action-plan-checklist.sqlite')
+  let store = createDatabase(databasePath)
+  let server = createApp(store).listen(0, '127.0.0.1')
+  await new Promise((resolve) => server.once('listening', resolve))
+  let baseUrl = `http://127.0.0.1:${server.address().port}`
+
+  t.after(async () => {
+    if (server.listening) {
+      await new Promise((resolve, reject) => {
+        server.close((error) => error ? reject(error) : resolve())
+      })
+    }
+    store.close()
+  })
+
+  async function jsonRequest(route, options) {
+    const response = await fetch(`${baseUrl}${route}`, options)
+    const body = response.status === 204 ? null : await response.json()
+    return { response, body }
+  }
+
+  const invalidRecommendation = await jsonRequest('/api/checklist/recommendation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: '   ' }),
+  })
+  assert.equal(invalidRecommendation.response.status, 400)
+
+  const created = await jsonRequest('/api/checklist/recommendation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: 'Explore a supervised robotics project' }),
+  })
+  assert.equal(created.response.status, 201)
+  assert.equal(created.body.completed, false)
+
+  const duplicate = await jsonRequest('/api/checklist/recommendation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: '  EXPLORE A SUPERVISED ROBOTICS PROJECT  ' }),
+  })
+  assert.equal(duplicate.response.status, 409)
+  assert.equal(duplicate.body.item.id, created.body.id)
+  assert.equal((await jsonRequest('/api/checklist')).body.length, 1)
+
+  await new Promise((resolve, reject) => {
+    server.close((error) => error ? reject(error) : resolve())
+  })
+  store.close()
+  store = createDatabase(databasePath)
+  server = createApp(store).listen(0, '127.0.0.1')
+  await new Promise((resolve) => server.once('listening', resolve))
+  baseUrl = `http://127.0.0.1:${server.address().port}`
+
+  const persisted = await jsonRequest('/api/checklist')
+  assert.equal(persisted.response.status, 200)
+  assert.equal(persisted.body.length, 1)
+  assert.equal(persisted.body[0].title, 'Explore a supervised robotics project')
+  assert.equal((await jsonRequest('/api/profile')).response.status, 200)
+})

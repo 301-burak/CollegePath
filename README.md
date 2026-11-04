@@ -17,6 +17,8 @@ The application is intended for high school students exploring possible careers 
 - Search a small catalog of Harvard, MIT, Stanford, UT Austin, and Boston University and save/remove local university goals.
 - Review sourced application materials, testing policies, published score ranges, and deadlines. Unverified items are labeled; published ranges are not minimums or admission guarantees.
 - Explore general optional preparation ideas, clearly separated from application requirements.
+- Generate a local rule-based action plan from saved courses, GPA/test-record availability, grade level, a selected career pathway, and saved university goals.
+- Add action-plan suggestions to the existing checklist; recommendation additions prevent duplicate titles and remain tracked with the normal checklist completion controls.
 - Create checklist items and mark them complete or incomplete.
 - Store checklist items and completion status in SQLite so they remain after page refreshes and backend restarts.
 - View distinct pending and completed tasks, with loading, validation, and request-error messages.
@@ -42,6 +44,8 @@ flowchart LR
     SQLite --- Academic[student_profile, student_courses, student_test_scores]
     SQLite --- UniversityCatalog[universities, university_facts]
     SQLite --- UniversityGoals[student_university_goals]
+    React -->|Local rules use saved records| ActionPlan[Personalized Action Plan]
+    ActionPlan -->|Selected suggestions| Checklist
 ```
 
 The Vite development server proxies `/api` requests to Express at `http://127.0.0.1:3001`. Express binds to loopback only. At startup it creates `checklist_items` if needed and applies versioned, additive SQL migrations recorded in `schema_migrations`. Migration `001_academic_profile.sql` creates the profile, course, and test-score tables without dropping or rewriting existing checklist rows. Migration `002_university_goals.sql` adds the public university catalog, sourced fact records, and local student goals; catalog rows are safely upserted while saved goals are preserved. The local database file is `server/data/collegepath.db`.
@@ -85,6 +89,7 @@ All endpoints are served by Express on port `3001`.
 | `GET` | `/api/health` | Returns `{ "status": "ok" }` to check that the API is running. |
 | `GET` | `/api/checklist` | Returns checklist items, newest first. Each item has `id`, `title`, `completed`, and `created_at`. |
 | `POST` | `/api/checklist` | Creates a checklist item. JSON body: `{ "title": "Research application deadlines", "completed": false }`. `completed` is optional and defaults to `false`. Titles must be non-empty and at most 200 characters. Returns the created item with HTTP 201. |
+| `POST` | `/api/checklist/recommendation` | Adds a recommended action to the existing checklist using `{ "title": "Explore a course or project" }`. Returns the saved item with HTTP 201; a case-insensitive duplicate returns HTTP 409 and the existing item. |
 | `PATCH` | `/api/checklist/:id` | Sets an item's completion state. JSON body: `{ "completed": true }` or `{ "completed": false }`. Returns the updated item. Invalid input returns HTTP 400; an unknown item returns HTTP 404. |
 | `GET` | `/api/profile` | Returns the local profile, courses, and test scores. Empty profile fields are `null`; collections start empty. |
 | `PUT` | `/api/profile` | Saves `{ "gradeLevel": 9, "weightedGpa": 4.2, "unweightedGpa": 3.8 }`. Use `null` for fields not entered. Grade must be 9–12; GPA values must be numbers from 0–10. |
@@ -106,6 +111,8 @@ Profile and academic records are served only by the loopback-bound local server 
 Career recommendations are computed in the frontend from predefined career data; they do not use an API or external AI service.
 
 The university catalog is a small curated starter set. Admissions details can change; each item links to the official university source and displays its last-verified date. “Not verified — check official admissions website.” means the detail was not confirmed for this catalog. Published score ranges describe the cited class/cohort only and are not minimums or admission guarantees. Preparation ideas are general suggestions, not university requirements. The catalog is reference information, not an admissions prediction.
+
+The Action Plan is generated in the browser from the local Academic Profile, selected career pathway, university goals/catalog, and current checklist. It reuses the curated career roadmap course/activity/project suggestions and only cites official university catalog sources. Profile gaps are called out instead of inferred; school course availability is not assumed. Suggestions are exploratory and do not predict or guarantee admissions. The generated plan itself is not separately persisted; only actions a student adds to the existing checklist are saved in SQLite. Refresh the plan after updating profile or university goals.
 
 ## Verify Checklist Persistence
 

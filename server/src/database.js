@@ -122,6 +122,22 @@ export function createDatabase(databasePath) {
     INSERT INTO checklist_items (title, completed)
     VALUES (?, ?)
   `)
+  const insertChecklistItemIfAbsent = database.prepare(`
+    INSERT INTO checklist_items (title, completed)
+    SELECT ?, 0
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM checklist_items
+      WHERE lower(trim(title)) = lower(trim(?))
+    )
+  `)
+  const getChecklistItemByTitle = database.prepare(`
+    SELECT id, title, completed, created_at
+    FROM checklist_items
+    WHERE lower(trim(title)) = lower(trim(?))
+    ORDER BY id
+    LIMIT 1
+  `)
   const getChecklistItem = database.prepare(`
     SELECT id, title, completed, created_at
     FROM checklist_items
@@ -250,6 +266,16 @@ export function createDatabase(databasePath) {
     createChecklistItem(title, completed) {
       const result = insertChecklistItem.run(title, completed ? 1 : 0)
       return toChecklistItem(getChecklistItem.get(result.lastInsertRowid))
+    },
+    createChecklistRecommendation(title) {
+      const result = insertChecklistItemIfAbsent.run(title, title)
+      if (result.changes === 0) {
+        return { created: false, item: toChecklistItem(getChecklistItemByTitle.get(title)) }
+      }
+      return {
+        created: true,
+        item: toChecklistItem(getChecklistItem.get(result.lastInsertRowid)),
+      }
     },
     updateChecklistItemCompletion(id, completed) {
       const result = updateChecklistItem.run(completed ? 1 : 0, id)

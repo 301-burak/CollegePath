@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import AcademicProfile from './AcademicProfile.jsx'
 import CareerRoadmap from './CareerRoadmap.jsx'
+import MyActionPlan from './MyActionPlan.jsx'
 import MyUniversities from './MyUniversities.jsx'
 import { careerPathways, getCareerRecommendations } from './careerPathways.js'
 import './App.css'
@@ -205,6 +206,7 @@ function App() {
   const [careerRecommendations, setCareerRecommendations] = useState([])
   const [careerMessage, setCareerMessage] = useState('')
   const [selectedPathwayId, setSelectedPathwayId] = useState(null)
+  const [actionPlanPathwayId, setActionPlanPathwayId] = useState(null)
   const [checklistItems, setChecklistItems] = useState([])
   const [checklistLoading, setChecklistLoading] = useState(true)
   const [checklistLoadFailed, setChecklistLoadFailed] = useState(false)
@@ -271,6 +273,12 @@ function App() {
     } finally {
       setAddingTask(false)
     }
+  }
+
+  function handleRecommendationAdded(item) {
+    setChecklistItems((items) => items.some((existing) => existing.id === item.id)
+      ? items
+      : [item, ...items])
   }
 
   async function handleChecklistToggle(item) {
@@ -359,6 +367,7 @@ function App() {
           <a href="#academic-profile">Academic Profile</a>
           <a href="#career-recommendations">Career Recommendations</a>
           <a href="#my-universities">My Universities</a>
+          <a href="#my-action-plan">My Action Plan</a>
           <a href="#my-checklist">My Checklist</a>
         </nav>
       </header>
@@ -382,6 +391,15 @@ function App() {
 
         <section id="my-universities" className="academic-section" aria-label="University goal tracker">
           <MyUniversities />
+        </section>
+
+        <section id="my-action-plan" className="academic-section" aria-label="Personalized action plan">
+          <MyActionPlan
+            pathwayId={actionPlanPathwayId}
+            onPathwayChange={setActionPlanPathwayId}
+            checklistItems={checklistItems}
+            onChecklistItemAdded={handleRecommendationAdded}
+          />
         </section>
 
         <section className="placeholders" aria-label="CollegePath features">
@@ -424,7 +442,10 @@ function App() {
                       <button
                         className="career-submit roadmap-open-button"
                         type="button"
-                        onClick={() => setSelectedPathwayId(career.pathwayId)}
+                        onClick={() => {
+                          setSelectedPathwayId(career.pathwayId)
+                          setActionPlanPathwayId(career.pathwayId)
+                        }}
                       >
                         View Roadmap
                       </button>

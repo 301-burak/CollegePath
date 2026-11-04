@@ -633,6 +633,259 @@ h1 {
   margin-top: 8px;
 }
 
+.action-plan-card {
+  padding: 28px;
+  border: 1px solid #e5e1d7;
+  border-radius: 14px;
+  background: #fffefa;
+}
+
+.action-plan-card h2 {
+  margin-bottom: 10px;
+  font-size: 1.35rem;
+}
+
+.action-plan-intro,
+.action-plan-hint {
+  color: #65736b;
+}
+
+.action-plan-checklist-link {
+  display: inline-block;
+  margin-top: 4px;
+  color: #275b4b;
+  font-size: 0.88rem;
+  font-weight: 650;
+  text-underline-offset: 3px;
+}
+
+.action-plan-pathway {
+  display: grid;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.action-plan-pathway label {
+  color: #34443d;
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+
+.action-plan-pathway select {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid #cbd4cb;
+  border-radius: 8px;
+  background: #fff;
+  color: #34443d;
+  font: inherit;
+}
+
+.action-plan-pathway select:focus-visible,
+.action-plan-add:focus-visible,
+.action-plan-refresh:focus-visible {
+  outline: 3px solid #8db9a2;
+  outline-offset: 2px;
+}
+
+.action-plan-refresh {
+  margin-top: 15px;
+  padding: 9px 12px;
+  border: 1px solid #c9d9cf;
+  border-radius: 8px;
+  background: #f0f5ef;
+  color: #275b4b;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.action-plan-refresh:hover {
+  background: #e6efe7;
+}
+
+.action-plan-hint {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.action-plan-overview {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.action-plan-overview div {
+  display: grid;
+  gap: 3px;
+  padding: 14px;
+  border: 1px solid #e8e4da;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.action-plan-overview strong {
+  color: #275b4b;
+  font-size: 1.25rem;
+}
+
+.action-plan-overview span {
+  color: #65736b;
+  font-size: 0.78rem;
+}
+
+.action-plan-profile-note,
+.action-plan-status {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: #f2f5ef;
+  color: #53665b;
+}
+
+.action-plan-profile-note h3 {
+  margin: 0 0 6px;
+  color: #34443d;
+  font-size: 0.92rem;
+}
+
+.action-plan-profile-note p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.action-plan-groups {
+  display: grid;
+  gap: 24px;
+  margin-top: 28px;
+}
+
+.action-plan-group h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 12px;
+  color: #34443d;
+  font-size: 1rem;
+}
+
+.action-plan-group h3 span {
+  display: inline-grid;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  place-items: center;
+  border-radius: 999px;
+  background: #edf1e9;
+  color: #53665b;
+  font-size: 0.75rem;
+}
+
+.action-plan-items {
+  display: grid;
+  gap: 12px;
+}
+
+.action-plan-item {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid #e8e4da;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.action-plan-item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.action-plan-item h4 {
+  margin: 0 0 9px;
+  color: #275b4b;
+  font-size: 0.98rem;
+  line-height: 1.4;
+}
+
+.action-plan-item > p {
+  margin: 8px 0;
+  color: #65736b;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.action-plan-item .action-plan-reason {
+  color: #53665b;
+}
+
+.action-plan-priority {
+  flex: none;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 0.73rem;
+  font-weight: 700;
+}
+
+.priority-high {
+  background: #fff0ed;
+  color: #9e3327;
+}
+
+.priority-medium {
+  background: #fff5df;
+  color: #78520a;
+}
+
+.priority-low {
+  background: #edf1e9;
+  color: #53665b;
+}
+
+.action-plan-sources {
+  display: grid;
+  gap: 5px;
+  margin: 10px 0;
+  padding-left: 20px;
+  color: #718078;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.action-plan-sources a {
+  color: #275b4b;
+  font-weight: 650;
+  text-underline-offset: 3px;
+}
+
+.action-plan-add {
+  margin-top: 8px;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #275b4b;
+  color: #fff;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.action-plan-add:hover:not(:disabled) {
+  background: #1d493b;
+}
+
+.action-plan-add:disabled {
+  border: 1px solid #c9d9cf;
+  background: #f0f5ef;
+  color: #53665b;
+  cursor: default;
+}
+
 footer {
   max-width: 1100px;
   margin: 0 auto;
@@ -673,8 +926,25 @@ footer {
     padding: 22px;
   }
 
+  .action-plan-card {
+    padding: 22px;
+  }
+
+  .action-plan-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .university-card {
     padding: 15px;
+  }
+
+  .action-plan-item {
+    padding: 14px;
+  }
+
+  .action-plan-item-header {
+    flex-direction: column-reverse;
+    gap: 7px;
   }
 
   .university-card-heading {
