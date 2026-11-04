@@ -230,11 +230,114 @@ test('academic profile routes validate, persist, and preserve existing checklist
   const migrations = new Database(databasePath, { readonly: true })
   assert.equal(
     migrations.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count,
-    1,
+    2,
   )
   assert.equal(
     migrations.prepare('SELECT COUNT(*) AS count FROM checklist_items').get().count,
     2,
   )
   migrations.close()
+})
+
+test('university catalog search and goals validate, persist, and expose sourced facts', async (t) => {
+  const databasePath = path.join(temporaryDirectory, 'university-goals.sqlite')
+  let store = createDatabase(databasePath)
+  let server = createApp(store).listen(0, '127.0.0.1')
+  await new Promise((resolve) => server.once('listening', resolve))
+  let baseUrl = `http://127.0.0.1:${server.address().port}`
+
+  t.after(async () => {
+    if (server.listening) {
+      await new Promise((resolve, reject) => {
+        server.close((error) => error ? reject(error) : resolve())
+      })
+    }
+    store.close()
+  })
+
+  async function jsonRequest(route, options) {
+    const response = await fetch(`${baseUrl}${route}`, options)
+    const body = response.status === 204 ? null : await response.json()
+    return { response, body }
+  }
+
+  const catalog = await jsonRequest('/api/universities')
+  assert.equal(catalog.response.status, 200)
+  assert.equal(catalog.body.length, 5)
+  for (const university of catalog.body) {
+    assert.ok(university.name)
+    assert.ok(university.location)
+    assert.ok(university.admissionsUrl.startsWith('https://'))
+    assert.equal(university.facts.length, 4)
+    for (const fact of university.facts) {
+      assert.ok(fact.sourceUrl.startsWith('https://'))
+      assert.match(fact.lastVerified, /^\d{4}-\d{2}-\d{2}$/)
+      assert.ok(['verified', 'unverified'].includes(fact.status))
+    }
+  }
+
+  const mitSearch = await jsonRequest('/api/universities?search=MIT')
+  assert.equal(mitSearch.response.status, 200)
+  assert.deepEqual(mitSearch.body.map(({ id }) => id), ['mit'])
+  assert.equal((await jsonRequest(`/api/universities?search=${'x'.repeat(81)}`))
+    .response.status, 400)
+  assert.equal(Object.hasOwn(catalog.body[0], 'courses'), false)
+
+  for (const body of [null, {}, { universityId: '../mit' }, { universityId: 10 }]) {
+    const invalidGoal = await jsonRequest('/api/university-goals', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    assert.equal(invalidGoal.response.status, 400)
+    assert.equal(typeof invalidGoal.body.error, 'string')
+  }
+
+  const unknownGoal = await jsonRequest('/api/university-goals', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ universityId: 'not-in-catalog' }),
+  })
+  assert.equal(unknownGoal.response.status, 404)
+
+  const createdGoal = await jsonRequest('/api/university-goals', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ universityId: 'mit' }),
+  })
+  assert.equal(createdGoal.response.status, 201)
+  assert.equal(createdGoal.body.universityId, 'mit')
+  assert.equal((await jsonRequest('/api/university-goals')).body.length, 1)
+
+  const duplicateGoal = await jsonRequest('/api/university-goals', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ universityId: 'mit' }),
+  })
+  assert.equal(duplicateGoal.response.status, 409)
+
+  await new Promise((resolve, reject) => {
+    server.close((error) => error ? reject(error) : resolve())
+  })
+  store.close()
+  store = createDatabase(databasePath)
+  server = createApp(store).listen(0, '127.0.0.1')
+  await new Promise((resolve) => server.once('listening', resolve))
+  baseUrl = `http://127.0.0.1:${server.address().port}`
+
+  const persistedGoals = await jsonRequest('/api/university-goals')
+  assert.equal(persistedGoals.response.status, 200)
+  assert.equal(persistedGoals.body.length, 1)
+  assert.equal(persistedGoals.body[0].universityId, 'mit')
+
+  const deletedGoal = await jsonRequest(`/api/university-goals/${createdGoal.body.id}`, {
+    method: 'DELETE',
+  })
+  assert.equal(deletedGoal.response.status, 204)
+  assert.equal((await jsonRequest('/api/university-goals')).body.length, 0)
+  assert.equal((await jsonRequest(`/api/university-goals/${createdGoal.body.id}`, {
+    method: 'DELETE',
+  })).response.status, 404)
+  assert.equal((await jsonRequest('/api/university-goals/0', { method: 'DELETE' }))
+    .response.status, 400)
 })

@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import Database from 'better-sqlite3'
+import { universityCatalog } from './universityCatalog.js'
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url))
 const migrationsDirectory = path.join(currentDirectory, 'migrations')
@@ -81,6 +82,37 @@ export function createDatabase(databasePath) {
     })()
   }
 
+  const upsertUniversity = database.prepare(`
+    INSERT INTO universities (id, name, location, admissions_url)
+    VALUES (@id, @name, @location, @admissionsUrl)
+    ON CONFLICT(id) DO UPDATE SET
+      name = excluded.name,
+      location = excluded.location,
+      admissions_url = excluded.admissions_url
+  `)
+  const upsertUniversityFact = database.prepare(`
+    INSERT INTO university_facts (
+      university_id, fact_type, title, fact_text, status, source_url, last_verified
+    )
+    VALUES (
+      @universityId, @type, @title, @text, @status, @sourceUrl, @lastVerified
+    )
+    ON CONFLICT(university_id, fact_type) DO UPDATE SET
+      title = excluded.title,
+      fact_text = excluded.fact_text,
+      status = excluded.status,
+      source_url = excluded.source_url,
+      last_verified = excluded.last_verified
+  `)
+  database.transaction(() => {
+    for (const university of universityCatalog) {
+      upsertUniversity.run(university)
+      for (const fact of university.facts) {
+        upsertUniversityFact.run({ ...fact, universityId: university.id })
+      }
+    }
+  })()
+
   const listChecklistItems = database.prepare(`
     SELECT id, title, completed, created_at
     FROM checklist_items
@@ -155,6 +187,63 @@ export function createDatabase(databasePath) {
     WHERE id = @id
   `)
 
+  const listUniversities = database.prepare(`
+    SELECT id, name, location, admissions_url
+    FROM universities
+    ORDER BY name COLLATE NOCASE
+  `)
+  const listUniversityFacts = database.prepare(`
+    SELECT fact_type, title, fact_text, status, source_url, last_verified
+    FROM university_facts
+    WHERE university_id = ?
+    ORDER BY CASE fact_type
+      WHEN 'requirements' THEN 1
+      WHEN 'testing_policy' THEN 2
+      WHEN 'score_ranges' THEN 3
+      WHEN 'deadlines' THEN 4
+    END
+  `)
+  const listUniversityGoals = database.prepare(`
+    SELECT id, university_id, created_at
+    FROM student_university_goals
+    ORDER BY id DESC
+  `)
+  const getUniversityGoal = database.prepare(`
+    SELECT id, university_id, created_at
+    FROM student_university_goals
+    WHERE id = ?
+  `)
+  const insertUniversityGoal = database.prepare(`
+    INSERT INTO student_university_goals (university_id)
+    VALUES (?)
+    ON CONFLICT(university_id) DO NOTHING
+  `)
+
+  function toUniversity(row) {
+    return {
+      id: row.id,
+      name: row.name,
+      location: row.location,
+      admissionsUrl: row.admissions_url,
+      facts: listUniversityFacts.all(row.id).map((fact) => ({
+        type: fact.fact_type,
+        title: fact.title,
+        text: fact.fact_text,
+        status: fact.status,
+        sourceUrl: fact.source_url,
+        lastVerified: fact.last_verified,
+      })),
+    }
+  }
+
+  function toUniversityGoal(row) {
+    return {
+      id: row.id,
+      universityId: row.university_id,
+      createdAt: row.created_at,
+    }
+  }
+
   return {
     close: () => database.close(),
     getChecklistItems: () => listChecklistItems.all().map(toChecklistItem),
@@ -194,6 +283,22 @@ export function createDatabase(databasePath) {
     },
     deleteTestScore(id) {
       return database.prepare('DELETE FROM student_test_scores WHERE id = ?').run(id).changes > 0
+    },
+    getUniversities() {
+      return listUniversities.all().map(toUniversity)
+    },
+    hasUniversity(id) {
+      return database.prepare('SELECT 1 FROM universities WHERE id = ?').get(id) !== undefined
+    },
+    getUniversityGoals: () => listUniversityGoals.all().map(toUniversityGoal),
+    createUniversityGoal(universityId) {
+      const result = insertUniversityGoal.run(universityId)
+      if (result.changes === 0) return null
+      return toUniversityGoal(getUniversityGoal.get(result.lastInsertRowid))
+    },
+    deleteUniversityGoal(id) {
+      return database.prepare('DELETE FROM student_university_goals WHERE id = ?').run(id)
+        .changes > 0
     },
   }
 }

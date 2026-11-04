@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import AcademicProfile from './AcademicProfile.jsx'
 import CareerRoadmap from './CareerRoadmap.jsx'
+import MyUniversities from './MyUniversities.jsx'
 import { careerPathways, getCareerRecommendations } from './careerPathways.js'
 import './App.css'
 
@@ -357,6 +358,7 @@ function App() {
         <nav aria-label="Main navigation">
           <a href="#academic-profile">Academic Profile</a>
           <a href="#career-recommendations">Career Recommendations</a>
+          <a href="#my-universities">My Universities</a>
           <a href="#my-checklist">My Checklist</a>
         </nav>
       </header>
@@ -376,6 +378,10 @@ function App() {
           aria-labelledby="academic-profile-heading"
         >
           <AcademicProfile />
+        </section>
+
+        <section id="my-universities" className="academic-section" aria-label="University goal tracker">
+          <MyUniversities />
         </section>
 
         <section className="placeholders" aria-label="CollegePath features">

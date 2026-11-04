@@ -14,6 +14,9 @@ The application is intended for high school students exploring possible careers 
 - See how saved courses connect to a pathway and which additional subjects a student could explore. Roadmaps use local rule-based guidance, not external AI.
 - Save a local academic profile with grade level, weighted and unweighted GPA, courses, and SAT/ACT scores.
 - Add, edit, and delete course and test-score entries; enter letter or percentage grades and optional test dates.
+- Search a small catalog of Harvard, MIT, Stanford, UT Austin, and Boston University and save/remove local university goals.
+- Review sourced application materials, testing policies, published score ranges, and deadlines. Unverified items are labeled; published ranges are not minimums or admission guarantees.
+- Explore general optional preparation ideas, clearly separated from application requirements.
 - Create checklist items and mark them complete or incomplete.
 - Store checklist items and completion status in SQLite so they remain after page refreshes and backend restarts.
 - View distinct pending and completed tasks, with loading, validation, and request-error messages.
@@ -37,9 +40,11 @@ flowchart LR
     Migrations[Versioned SQL migrations] --> SQLite
     SQLite --- Checklist[checklist_items]
     SQLite --- Academic[student_profile, student_courses, student_test_scores]
+    SQLite --- UniversityCatalog[universities, university_facts]
+    SQLite --- UniversityGoals[student_university_goals]
 ```
 
-The Vite development server proxies `/api` requests to Express at `http://127.0.0.1:3001`. Express binds to loopback only. At startup it creates `checklist_items` if needed and applies versioned, additive SQL migrations recorded in `schema_migrations`. Migration `001_academic_profile.sql` creates the profile, course, and test-score tables without dropping or rewriting existing checklist rows. The local database file is `server/data/collegepath.db`.
+The Vite development server proxies `/api` requests to Express at `http://127.0.0.1:3001`. Express binds to loopback only. At startup it creates `checklist_items` if needed and applies versioned, additive SQL migrations recorded in `schema_migrations`. Migration `001_academic_profile.sql` creates the profile, course, and test-score tables without dropping or rewriting existing checklist rows. Migration `002_university_goals.sql` adds the public university catalog, sourced fact records, and local student goals; catalog rows are safely upserted while saved goals are preserved. The local database file is `server/data/collegepath.db`.
 
 ## Run Locally in VS Code
 
@@ -91,10 +96,16 @@ All endpoints are served by Express on port `3001`.
 | `POST` | `/api/test-scores` | Adds a `testType` (`sat_math`, `sat_reading_writing`, or `act_composite`), integer `score`, and `testDate` (valid `YYYY-MM-DD` date or `null`). SAT section scores must be 200–800; ACT composite scores must be 1–36. |
 | `PUT` | `/api/test-scores/:id` | Updates a test score using the same body fields as `POST`. |
 | `DELETE` | `/api/test-scores/:id` | Deletes a test score. |
+| `GET` | `/api/universities?search=MIT` | Searches the public catalog by university name or location. Each admissions fact includes its official source URL and last-verified date. |
+| `GET` | `/api/university-goals` | Lists this local student's saved university goals. |
+| `POST` | `/api/university-goals` | Saves a catalog university using `{ "universityId": "mit" }`. Duplicate goals return HTTP 409; invalid IDs return HTTP 400. |
+| `DELETE` | `/api/university-goals/:id` | Removes a saved university goal. |
 
 Profile and academic records are served only by the loopback-bound local server and are not separated by accounts. Do not expose these endpoints publicly.
 
 Career recommendations are computed in the frontend from predefined career data; they do not use an API or external AI service.
+
+The university catalog is a small curated starter set. Admissions details can change; each item links to the official university source and displays its last-verified date. “Not verified — check official admissions website.” means the detail was not confirmed for this catalog. Published score ranges describe the cited class/cohort only and are not minimums or admission guarantees. Preparation ideas are general suggestions, not university requirements. The catalog is reference information, not an admissions prediction.
 
 ## Verify Checklist Persistence
 
@@ -145,6 +156,8 @@ The tests use temporary SQLite files and do not read or modify the local `server
 - Career suggestions come from a small, predefined rule-based catalog. They are exploratory examples, not an assessment or a promise of career fit.
 - Career interest selections and results are held in page state and are not saved.
 - The checklist is shared by anyone using the same local SQLite database; there are no accounts or per-student data separation.
+- University goals are likewise stored in the shared local database without accounts; they are not safe to expose on a public or shared network.
+- The initial university catalog is intentionally small, and admissions facts need periodic re-verification against the linked official sources.
 - Checklist items can be created and marked complete/incomplete, but there are no edit or delete endpoints.
 - The app is set up for local development and Codespaces preview. Production deployment and production server configuration are not included.
 - SQLite is local to the environment. A fresh clone starts with a new database; ignored local data is not pushed to GitHub.

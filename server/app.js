@@ -91,6 +91,14 @@ function parseId(request, response) {
   return id
 }
 
+function validateUniversityGoal(body) {
+  if (!isObject(body) || typeof body.universityId !== 'string'
+    || !/^[a-z0-9-]{1,60}$/.test(body.universityId)) {
+    return 'University ID must be a valid catalog ID.'
+  }
+  return null
+}
+
 function handle(handler) {
   return (request, response, next) => {
     try {
@@ -110,6 +118,55 @@ export function createApp(store) {
   app.get('/api/health', (_request, response) => {
     response.json({ status: 'ok' })
   })
+
+  app.get('/api/universities', handle((request, response) => {
+    const search = request.query.search ?? ''
+    if (typeof search !== 'string' || search.length > 80) {
+      response.status(400).json({ error: 'Search must be 80 characters or fewer.' })
+      return
+    }
+    const normalizedSearch = search.trim().toLocaleLowerCase()
+    const universities = store.getUniversities().filter((university) => (
+      !normalizedSearch
+      || university.id.toLocaleLowerCase().includes(normalizedSearch)
+      || university.name.toLocaleLowerCase().includes(normalizedSearch)
+      || university.location.toLocaleLowerCase().includes(normalizedSearch)
+    ))
+    response.json(universities)
+  }))
+
+  app.get('/api/university-goals', handle((_request, response) => {
+    response.json(store.getUniversityGoals())
+  }))
+
+  app.post('/api/university-goals', handle((request, response) => {
+    const validationError = validateUniversityGoal(request.body)
+    if (validationError) {
+      response.status(400).json({ error: validationError })
+      return
+    }
+    const { universityId } = request.body
+    if (!store.hasUniversity(universityId)) {
+      response.status(404).json({ error: 'University was not found in the catalog.' })
+      return
+    }
+    const goal = store.createUniversityGoal(universityId)
+    if (!goal) {
+      response.status(409).json({ error: 'This university is already in your goals.' })
+      return
+    }
+    response.status(201).json(goal)
+  }))
+
+  app.delete('/api/university-goals/:id', handle((request, response) => {
+    const id = parseId(request, response)
+    if (id === null) return
+    if (!store.deleteUniversityGoal(id)) {
+      response.status(404).json({ error: 'University goal not found.' })
+      return
+    }
+    response.status(204).end()
+  }))
 
   app.get('/api/checklist', handle((_request, response) => {
     response.json(store.getChecklistItems())

@@ -171,3 +171,30 @@ No pre-existing bug was targeted. Existing Academic Profile and My Checklist dat
 - Read-only checks confirmed the profile/courses/test-score counts matched the profile API, and all four existing checklist items matched the checklist API and SQLite contents.
 - Final `npm test` in `client/` passed all five tests; `npm run build` and `npm run lint` passed. Final `npm test` in `server/` passed its API/SQLite persistence test.
 - No local student values were copied into this log. No merge or deployment was performed.
+
+## CollegePath 2.0 Phase 4: University Goal Tracker
+
+### Asked
+Add a local university search and goal tracker for Harvard, MIT, Stanford, UT Austin, and Boston University. Show application materials, testing policies, published score ranges, deadlines, optional preparation suggestions, and source URLs with last-verified dates. Do not invent admissions data, expose private profiles, alter existing student data, or implement action plans; test search, goal CRUD, validation, SQLite persistence, and existing features.
+
+### Got
+- Added a maintained, five-school starter catalog with fact-level source URLs and verification dates (`2026-11-04`). Harvard, MIT, Stanford, and UT Austin entries contain researched admissions facts linked to their official admissions sources. Boston University admissions details are explicitly shown as “Not verified — check official admissions website.” rather than guessed.
+- Displayed published score ranges only where verified and labeled them with their class/cohort; the UI states ranges are not minimums or admission guarantees. Optional preparation ideas are identified as general suggestions, separate from application requirements.
+- Added the “My Universities” navigation section with name/location search, saved-goal list, add/remove actions, loading and retry states, validation errors, accessible controls, and responsive layout. Fact details display their official source URL and last-verified date.
+- Added an additive `002_university_goals.sql` migration for the reference catalog, sourced facts, and student university goals. Catalog startup seeding is idempotent and preserves saved goals. Added local API endpoints for catalog search and university-goal list/create/delete; the catalog endpoint returns no student profile data.
+- Updated the README architecture diagram, migration/API documentation, and local-only privacy notes. No action plans were added.
+
+### Fixed
+- Made duplicate goal insertion race-safe with the database uniqueness constraint and a conflict response.
+- Extended the existing profile/checklist regression test for the second additive migration; added isolated SQLite/API coverage for catalog search, citations, invalid and unknown IDs, duplicate goals, add/remove, and persistence across a server restart.
+
+### Verified
+- `npm run build`, `npm run lint`, and `npm test` in `client/` passed; the existing five career-roadmap tests passed.
+- `npm test` in `server/` passed: two API/SQLite tests, including migration and existing-checklist preservation.
+- In the local browser, searched for Boston University and MIT, opened their admissions details, and verified the explicit unverified fallback, visible source URL, and last-verified date. Added and removed a temporary MIT goal through the UI; it was removed after the check.
+- The user reports manually verifying search, adding Harvard and MIT, persistence after refresh, independent removal, and admissions details.
+- Finalization checks reran the frontend build, lint, and all five client tests, plus both server API/SQLite tests; all passed. Browser checks confirmed the academic profile and checklist load, interest-based career recommendations render, a roadmap opens with course and grade guidance, and the checklist remains visible.
+- Read-only API checks confirmed 1 profile, 1 course, 2 test scores, 4 checklist items, and 2 saved university goals. The current local saved-goal selection differs from the user's reported Harvard/MIT verification; no goal data was changed. No academic values or goal selections were added to this log.
+- `.gitignore` covers SQLite/database files, `.env` secrets, and `node_modules`; `git ls-files` showed no such files tracked.
+- Local test URLs: `http://127.0.0.1:5174/#my-universities` (frontend) and `http://127.0.0.1:3001/api/universities` (local catalog API). Express remains loopback-bound.
+- Work remains uncommitted on `feature/collegepath-v2`; no push, merge, or deployment was performed.
