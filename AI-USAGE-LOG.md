@@ -113,3 +113,116 @@ No application bug or feature was fixed for Lesson 16. The documentation was cre
 - Browser keyboard interaction selected Technology and Engineering and submitted the form: Technology returned three results (`Software Developer`, `Cybersecurity Analyst`, and `UX Designer`); Engineering returned three (`Civil Engineer`, `Mechanical Engineer`, and `Biomedical Engineer`); Technology + Engineering returned three results; and submitting with no interests displayed the friendly prompt.
 - Browser pointer-click automation on the Technology checkbox timed out because the parent career article was reported as intercepting the pointer event. The keyboard interaction did verify the recommendation flow, but this automation attempt does not establish a successful mouse interaction check or demonstrate an application defect. No application code was changed.
 - No server restart or page-refresh persistence test was performed specifically for the newly added Lesson 16 demo rows.
+
+## CollegePath 2.0 Phase 2: Student Academic Profile
+
+### Asked
+Implement the Academic Profile feature on `feature/collegepath-v2`: let the single local student save grade level, weighted and unweighted GPA, courses, and SAT/ACT scores; edit or delete course and test-score entries; validate inputs; preserve the existing checklist and career recommender; keep the API local-only; test build, lint, API, and SQLite persistence; and do not commit, push, or deploy.
+
+### Got
+- Added a responsive Academic Profile section and navigation link with grade/GPA fields, course and test-score forms, edit/delete controls, summary counts, empty states, loading indicators, and visible request errors.
+- Added API routes for profile GET/PUT, course GET/POST/PUT/DELETE, and test-score GET/POST/PUT/DELETE. GPA values accept 0–10 as a broad form-entry range; grades accept A–F with optional +/- or percentages from 0–100; SAT sections accept 200–800; ACT Composite accepts 1–36; dates are validated.
+- Added transactional, version-tracked SQLite migration `001_academic_profile.sql` for the single local profile, courses, and test scores. Existing `checklist_items` rows are not rewritten or deleted.
+- Bound Express to `127.0.0.1`, directed Vite's `/api` proxy to that loopback address, and documented that the unauthenticated prototype must not be shared, forwarded, or deployed.
+- Added `npm test` using Node's built-in test runner and temporary SQLite databases. Updated README setup, endpoints, validation, migration, privacy, and test instructions.
+- No university tracking or action-plan functionality was added.
+
+### Fixed
+No pre-existing application bug was targeted. The academic profile functionality was added without replacing the existing career recommendation or checklist flows.
+
+### Verified
+- `npm run build` in `client/` completed successfully.
+- `npm run lint` in `client/` completed successfully with no warnings.
+- `npm test` in `server/` passed: 1 test, 0 failures. The isolated API/persistence test covered profile and course/test-score validation and CRUD, migration re-open/persistence, checklist GET/POST/PATCH behavior, and preservation of a pre-existing checklist record in its temporary SQLite database.
+- `node --check` passed for `server/index.js`, `server/app.js`, `server/src/database.js`, and `server/test/academic-profile.test.js`.
+- The existing local database migrated in place: the profile initialized with blank fields, course and score tables started empty, and one migration was recorded. Its four checklist rows remained unchanged; a read-only SQLite query matched the checklist API response, including completion states.
+- Browser verification on the local app saved and cleared a profile, added/edited/deleted a course and test score, restored both empty states, and confirmed the existing checklist and Technology career recommendations remained available. A 390-pixel viewport had no horizontal overflow; the exercised page produced no failed HTTP responses or Console errors.
+- The student manually verified saving grade level and GPA, adding a high school course and grade, saving SAT Math and SAT Reading and Writing scores, then refreshing and confirming the data persisted. This manual check was reported by the student; no private academic values were added to this log.
+- The frontend and backend were verified on local ports `5174` and `3001`, with Express bound to `127.0.0.1`.
+- No university tracking or action-plan work was included in this phase.
+
+## CollegePath 2.0 Phase 3: Personalized Career Pathway Roadmaps
+
+### Asked
+Expand Career Recommendations with curated Cybersecurity, Software Engineering/Computer Science, Mechanical Engineering, Medicine/Healthcare, Business/Finance, and Law roadmaps. Each roadmap should explain relevant courses and advanced options, skills, extracurricular ideas, projects, and flexible grade 9–12 milestones, and use the student's saved courses to personalize suggestions. Preserve academic profile and checklist data and features; use no external AI or admissions claims; add tests; do not commit, push, merge, or deploy.
+
+### Got
+- Added six curated, rule-based pathway catalogs with descriptions, related careers, course suggestions and advanced options, technical and soft skills, optional activities/competitions, project ideas, and grade-by-grade suggestions.
+- Added `View Roadmap` actions to career recommendation cards while retaining the existing interest matcher and its top-three behavior. Added Software Engineer and Lawyer recommendations and a Law interest category.
+- Added profile-aware course matching: related courses are acknowledged and no longer repeated as missing suggestions. For example, AP Computer Science coursework connects to the cybersecurity pathway while networking and other topics remain possible next steps.
+- Added accessible, responsive roadmap details and course-loading states with retry and a general-roadmap fallback when profile loading fails. Guidance explicitly labels classes and extracurriculars as suggestions, not requirements.
+- Added five frontend unit tests for career selection, all six roadmap models and grade levels, course personalization, empty academic profiles, and profile-fetch failure/invalid-response handling. Documented Phase 3 and the frontend test command in the README.
+- No university tracking, action plan, admissions requirements, or external AI service was added.
+
+### Fixed
+No pre-existing bug was targeted. Existing Academic Profile and My Checklist data and behavior were left intact.
+
+### Verified
+- `npm test` in `client/` passed: 5 tests, 0 failures.
+- `npm run build` and `npm run lint` in `client/` completed successfully.
+- `npm test` in `server/` passed: 1 API/SQLite persistence test, 0 failures.
+- Browser-tested the existing Technology recommendations and roadmap buttons, a Cybersecurity roadmap personalized with a mocked AP Computer Science course, Law selection and its grade 9–12 roadmap, and a mocked profile API failure with retry/general-roadmap options.
+- At a 375 CSS-pixel viewport, the page had no horizontal overflow. The local profile API and checklist remained available; browser tests used mocked profile data and did not add, delete, or overwrite saved academic or checklist records.
+- During implementation, no push, merge, or deployment was performed.
+
+### Final Phase 3 Verification
+- Verified Law, Cybersecurity, and Mechanical Engineering in the live browser. Each rendered recommended courses, technical and soft skills, extracurricular suggestions, personal project ideas, and roadmap sections for grades 9–12.
+- Verified personalization against the existing local Academic Profile without changing it: Cybersecurity and Mechanical Engineering each recognized one saved course area; Law correctly stated that saved courses are a useful starting point and showed additional suggestions.
+- Read-only checks confirmed the profile/courses/test-score counts matched the profile API, and all four existing checklist items matched the checklist API and SQLite contents.
+- Final `npm test` in `client/` passed all five tests; `npm run build` and `npm run lint` passed. Final `npm test` in `server/` passed its API/SQLite persistence test.
+- No local student values were copied into this log. No merge or deployment was performed.
+
+## CollegePath 2.0 Phase 4: University Goal Tracker
+
+### Asked
+Add a local university search and goal tracker for Harvard, MIT, Stanford, UT Austin, and Boston University. Show application materials, testing policies, published score ranges, deadlines, optional preparation suggestions, and source URLs with last-verified dates. Do not invent admissions data, expose private profiles, alter existing student data, or implement action plans; test search, goal CRUD, validation, SQLite persistence, and existing features.
+
+### Got
+- Added a maintained, five-school starter catalog with fact-level source URLs and verification dates (`2026-11-04`). Harvard, MIT, Stanford, and UT Austin entries contain researched admissions facts linked to their official admissions sources. Boston University admissions details are explicitly shown as “Not verified — check official admissions website.” rather than guessed.
+- Displayed published score ranges only where verified and labeled them with their class/cohort; the UI states ranges are not minimums or admission guarantees. Optional preparation ideas are identified as general suggestions, separate from application requirements.
+- Added the “My Universities” navigation section with name/location search, saved-goal list, add/remove actions, loading and retry states, validation errors, accessible controls, and responsive layout. Fact details display their official source URL and last-verified date.
+- Added an additive `002_university_goals.sql` migration for the reference catalog, sourced facts, and student university goals. Catalog startup seeding is idempotent and preserves saved goals. Added local API endpoints for catalog search and university-goal list/create/delete; the catalog endpoint returns no student profile data.
+- Updated the README architecture diagram, migration/API documentation, and local-only privacy notes. No action plans were added.
+
+### Fixed
+- Made duplicate goal insertion race-safe with the database uniqueness constraint and a conflict response.
+- Extended the existing profile/checklist regression test for the second additive migration; added isolated SQLite/API coverage for catalog search, citations, invalid and unknown IDs, duplicate goals, add/remove, and persistence across a server restart.
+
+### Verified
+- `npm run build`, `npm run lint`, and `npm test` in `client/` passed; the existing five career-roadmap tests passed.
+- `npm test` in `server/` passed: two API/SQLite tests, including migration and existing-checklist preservation.
+- In the local browser, searched for Boston University and MIT, opened their admissions details, and verified the explicit unverified fallback, visible source URL, and last-verified date. Added and removed a temporary MIT goal through the UI; it was removed after the check.
+- The user reports manually verifying search, adding Harvard and MIT, persistence after refresh, independent removal, and admissions details.
+- Finalization checks reran the frontend build, lint, and all five client tests, plus both server API/SQLite tests; all passed. Browser checks confirmed the academic profile and checklist load, interest-based career recommendations render, a roadmap opens with course and grade guidance, and the checklist remains visible.
+- Read-only API checks confirmed 1 profile, 1 course, 2 test scores, 4 checklist items, and 2 saved university goals. The current local saved-goal selection differs from the user's reported Harvard/MIT verification; no goal data was changed. No academic values or goal selections were added to this log.
+- `.gitignore` covers SQLite/database files, `.env` secrets, and `node_modules`; `git ls-files` showed no such files tracked.
+- Local test URLs: `http://127.0.0.1:5174/#my-universities` (frontend) and `http://127.0.0.1:3001/api/universities` (local catalog API). Express remains loopback-bound.
+- Work remains uncommitted on `feature/collegepath-v2`; no push, merge, or deployment was performed.
+
+## CollegePath 2.0 Phase 5: Personalized Action Plan
+
+### Asked
+Build a local, rule-based action plan from saved academic data, a selected career pathway, saved university goals, and existing checklist tasks. Include courses, test preparation, optional activities and projects, official-source university reminders, priorities and reasons; let students add recommendations to My Checklist without duplicates. Preserve existing data and features; do not add authentication, external AI, admissions predictions, or a commit/push/deployment.
+
+### Got
+- Added a responsive “My Action Plan” section with an explicit pathway selector. Opening a career roadmap also selects that pathway for the plan. A refresh control reloads profile and university information after students update those sections.
+- Added a rule-based recommendation engine that reuses the existing pathway course, activity, and project catalog, identifies saved course matches, acknowledges saved GPA and SAT/ACT records without applying score/GPA cutoffs, and adjusts priority by grade.
+- Added explainable suggestions in the requested categories, including school-availability caveats for course ideas and explicit incomplete-profile context. When no university goals are saved, the plan asks the student to select one instead of generating school-specific claims.
+- For saved universities, added separate requirement, deadline, and testing-policy follow-ups with official source links. Verified facts carry their source and verification date; unverified facts link to the official admissions site and are clearly labeled rather than repeated as facts.
+- Added a duplicate-safe `POST /api/checklist/recommendation` route backed by the existing SQLite checklist table. It validates titles, atomically detects case-insensitive duplicates, returns the existing task with HTTP 409, and persists new recommendations using the existing checklist records and completion controls. No migration or new student-data table was needed.
+- Updated the README with action-plan and API documentation. No existing profile, goal, or checklist records were altered during verification.
+
+### Fixed
+- Removed an unused helper and corrected checklist-add callback placement after lint detected both issues.
+- Kept a failed checklist load visible when a recommendation is added, avoiding a misleading display of a partial checklist.
+- Made recommendation title duplicate detection resilient to case and surrounding whitespace in both the UI and API.
+
+### Verified
+- `npm test` in `client/` passed all 13 tests, including all six pathways, course personalization, missing profile details, no university goals, verified/unverified university sources, GPA/test-score acknowledgment, duplicate tracking, and API error/malformed-data handling.
+- `npm run lint` and `npm run build` in `client/` passed.
+- `npm test` in `server/` passed all 3 API/SQLite tests, including invalid input, case-insensitive duplicate prevention, persistence after reopening SQLite, and regressions preserving profile/checklist data.
+- Browser-tested all six pathway selections and confirmed each rendered course, activity, and project suggestions. A mocked checklist-add response updated the visible checklist and changed the recommendation to “In My Checklist”; the real local database was not written by this browser check.
+- Simulated an Academic Profile API failure in the browser, confirmed a friendly error, and verified retry restored the plan.
+- At a 390px mobile viewport, the document width was 375px, with no horizontal overflow.
+- Read-only local API checks confirmed the Academic Profile, its saved course/test-score collections, existing checklist, and saved university goals remain available. No database or migration files were added or modified, and no existing saved records were changed.
+- The feature remains uncommitted on `feature/collegepath-v2`; no push, merge, or deployment was performed.
